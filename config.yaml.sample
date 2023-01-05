@@ -1,0 +1,29 @@
+application:
+  api_name: "HomelabAPI"
+  api_key: "abc123def456ghi789j0abc123def456ghi789j0"
+  current_outputs: "telegram"
+
+outputs:
+  email:
+    - name: "Email"
+      server: "mail.example.com"
+      protocol: "tls"
+      port: "587"
+      username: "abc123def456ghi789j0"
+      password: "0j987ihg654fed321cba"
+      email_sender: "from@example.com"
+      email_receiver: "to@example.com"
+  pushbullet:
+    - name: "Pushbullet"
+      api_key: "f456ghi789j0abc123def456g"
+  pushover:
+    - name: "Pushover"
+      api_token: "bc123def456ghi789j0ab"
+      api_user: "6ghi789j0abc123def456"
+  telegram:
+    - name: "Telegram"
+      api_key: "0987654321:def456ghi789j0abc123def456ghi789j"
+      user_id: "1234567890"
+  webhook:
+    - name: "Webhook"
+      url: "http://api.example.com/receive-homelabapi-output"

@@ -1,0 +1,17 @@
+version: "3"
+
+services:
+
+  api:
+    build:
+      context: ./
+    container_name: homelab_api
+    ports:
+      - "8090:80"
+    restart: unless-stopped
+    networks:
+      - main_network
+
+networks:
+  main_network:
+    driver: bridge
