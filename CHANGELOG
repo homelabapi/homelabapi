@@ -1,4 +1,7 @@
 HomelabAPI CHANGELOG
 ====================
+v0.2.0      2023-01-05
+- Added input support for ChangeDetection.io
+
 v0.1.0      2023-01-05
 - Initial Commit
