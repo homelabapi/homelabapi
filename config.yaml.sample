@@ -4,6 +4,10 @@ application:
   current_outputs: "telegram"
 
 outputs:
+  discord:
+    - name: "Discord"
+      username: "username#1234"
+      url: "https://discord.com/api/webhooks/abc123def456ghi789j0/0j987ihg654fed321cba"
   email:
     - name: "Email"
       server: "mail.example.com"

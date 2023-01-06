@@ -14,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 
-all_outputs = ("email", "pushbullet", "pushover", "telegram", "webhook")
+all_outputs = ("discord", "email", "pushbullet", "pushover", "telegram", "webhook")
 
 with open("/code/app/config.yaml", mode="rt", encoding="utf-8") as file:
     configuration = yaml.safe_load(file)
@@ -39,6 +39,8 @@ with open("/code/app/config.yaml", mode="rt", encoding="utf-8") as file:
     output_settings = configuration["outputs"]
     for key, value in output_settings.items():
         match key:
+            case "discord":
+                outputs["discord"] = value
             case "email":
                 outputs["email"] = value
             case "pushbullet":
@@ -1081,6 +1083,8 @@ def send_output(request_body, subject, message, url, priority):
         try:
 
             match output:
+                case "discord":
+                    send_discord(subject, message, url)
                 case "email":
                     send_email(subject, message, url)
                 case "pushbullet":
@@ -1095,6 +1099,37 @@ def send_output(request_body, subject, message, url, priority):
         except:
 
             return status.HTTP_400_BAD_REQUEST
+
+
+def send_discord(subject, message, url):
+
+    full_message = ""
+
+    if subject and subject != "":
+        full_message += subject
+
+    if message and message != "":
+        full_message += "\n" + message
+
+    if url and url != "":
+        full_message += "\n\n" + url
+
+    headers = {
+        "Content-Type": "application/json",
+    }
+
+    for account in outputs["discord"]:
+
+        data = json.dumps({"username": account["username"], "content": full_message})
+
+        try:
+
+            response = requests.post(account["url"], headers=headers, data=data)
+            response.raise_for_status()
+
+        except requests.exceptions.RequestException as error:
+
+            raise SystemExit(error)
 
 
 def send_email(subject, message, url):
