@@ -1,5 +1,8 @@
 HomelabAPI CHANGELOG
 ====================
+v0.3.0      2023-01-06
+- Added output support for Discord
+
 v0.2.0      2023-01-05
 - Added input support for ChangeDetection.io
 
