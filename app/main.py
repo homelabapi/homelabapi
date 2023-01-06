@@ -65,6 +65,7 @@ desc_smokeping = "Receive a POST request from SmokePing"
 desc_uptimerobot = "Receive a POST request from UptimeRobot"
 
 # Webhook Descriptions
+desc_changedetectionio = "Receive a webhook from ChangeDetection.io"
 desc_headphones = "Receive a webhook from Headphones"
 desc_homeassistant = "Receive a webhook from Home Assistant"
 desc_lazylibrarian = "Receive a webhook from LazyLibrarian"
@@ -74,6 +75,7 @@ desc_synology = "Receive a webhook from a Synology NAS"
 desc_tailscale = "Receive a webhook from Tailscale"
 
 # Default Subjects
+subject_changedetectionio = "ChangeDetection.io"
 subject_headphones = "Headphones"
 subject_homeassistant = "Home Assistant"
 subject_lazylibrarian = "LazyLibrarian"
@@ -770,6 +772,39 @@ async def uptimerobot(payload: UptimeRobotModel):
             to_return = {"result": input_failure}
 
         return to_return
+
+    else:
+
+        return {"result": "Invalid API Key (" + str(status.HTTP_401_UNAUTHORIZED) + ")"}
+
+
+@app.post(
+    "/changedetectionio/{api_key}",
+    summary=desc_changedetectionio,
+    description=desc_changedetectionio,
+    tags=["Service Webhooks"],
+    status_code=status.HTTP_200_OK,
+    include_in_schema=True,
+)
+async def webhook_changedetectionio(api_key: str, payload: Request):
+
+    if api_key == app_api_key:
+
+        try:
+
+            result = await payload.json()
+            send_output(
+                result,
+                result["title"],
+                result["message"].removesuffix("\n---\n\n---"),
+                "",
+                0,
+            )
+            return {"result": input_success}
+
+        except Exception:
+
+            return {"result": input_failure}
 
     else:
 

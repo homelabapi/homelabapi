@@ -22,7 +22,7 @@ Due to the nature of HomelabAPI, a fully functional demo is a bit tricky, howeve
 
 Supported Inputs
 ----------------
-Headphones, HealthChecks, Home Assistant, LazyLibrarian, Radarr, Monit, SmokePing, Sonarr, Synology, Tailscale, UptimeRobot, Any POST Webhook that allows you to specify a request body
+ChangeDetection.io, Headphones, HealthChecks, Home Assistant, LazyLibrarian, Radarr, Monit, SmokePing, Sonarr, Synology, Tailscale, UptimeRobot, Any POST Webhook that allows you to specify a request body
 
 Supported Outputs
 -----------------
