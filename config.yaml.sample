@@ -21,6 +21,9 @@ outputs:
     - name: "Gotify"
       url: "https://gotify.example.com:8000"
       token: "AFVifxlxE.XLxwN"
+  ntfysh:
+    - name: "ntfy.sh"
+      topic: "abc123def456ghi789j0"
   pushbullet:
     - name: "Pushbullet"
       api_key: "f456ghi789j0abc123def456g"

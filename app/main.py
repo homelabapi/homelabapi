@@ -18,6 +18,7 @@ all_outputs = (
     "discord",
     "email",
     "gotify",
+    "ntfysh",
     "pushbullet",
     "pushover",
     "telegram",
@@ -53,6 +54,8 @@ with open("/code/app/config.yaml", mode="rt", encoding="utf-8") as file:
                 outputs["email"] = value
             case "gotify":
                 outputs["gotify"] = value
+            case "ntfysh":
+                outputs["ntfysh"] = value
             case "pushbullet":
                 outputs["pushbullet"] = value
             case "pushover":
@@ -1099,6 +1102,8 @@ def send_output(request_body, subject, message, url, priority):
                     send_email(subject, message, url)
                 case "gotify":
                     send_gotify(subject, message, url, priority)
+                case "ntfysh":
+                    send_ntfysh(subject, message, url, priority)
                 case "pushbullet":
                     send_pushbullet(subject, message, url)
                 case "pushover":
@@ -1186,6 +1191,33 @@ def send_gotify(subject, message, url, priority):
         try:
 
             response = requests.post(full_url, data=data)
+            response.raise_for_status()
+
+        except requests.exceptions.RequestException as error:
+
+            raise SystemExit(error)
+
+
+def send_ntfysh(subject, message, url, priority):
+
+    headers = {}
+
+    if subject and subject != "":
+        headers["Title"] = subject
+
+    if url and url != "":
+        headers["Click"] = url
+
+    if priority and priority != "":
+        headers["Priority"] = priority
+
+    for account in outputs["ntfysh"]:
+
+        try:
+
+            response = requests.post(
+                "https://ntfy.sh/" + account["topic"], headers=headers, data=message
+            )
             response.raise_for_status()
 
         except requests.exceptions.RequestException as error:
