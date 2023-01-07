@@ -28,21 +28,20 @@ Supported Outputs
 -----------------
 Discord, Email, Gotify, Pushbullet, Pushover, Telegram, Any POST Webhook
 
+Requirements
+------------
+Docker, Docker Compose
+
 Installation
 ------------
-Getting HomelabAPI up-and-running is as easy as cloning a git repository, updating a configuration file (see below), and starting a docker container.
-
-    git clone https://github.com/homelabapi/homelabapi.git
-    cd homelabapi
-    (configure HomelabAPI here, see below)
-    docker-compose up
-    Open HomelabAPI in a web browser and you'll be presented with the full API documentation
+Installing HomelabAPI is super easy, just follow the below steps and you'll be up-and-running in no time.
+- Copy docker-compose.yml.sample to docker-compose.yml and update the file accordingly
+- Copy config.yaml.sample to config.yaml and update it accordingly
+  - In the "application" section, you need to specify a completely random string of text for the "api_key" variable. This is the API key you'll use to connect to HomelabAPI.
+- Run docker-compose up
 
 Configuration
 -------------
-- Copy the docker-compose.yml.sample file to docker-compose.yml and update it accordingly
-- Copy the config.yaml.sample file to config.yaml and update it accordingly
-  - In the "application" section, you need to specify a completely random string of text for the "api_key" variable. This is the API key you'll use to connect to HomelabAPI.
 - You can send to multiple outputs by modifying the "current_outputs" variable. Separate multiple outputs by commas, or use "all" to send to every configured output.
 - Certain services require a script to run in order to send information to HomelabAPI, such as Monit and SmokePing. Some fully functional example scripts can be found in the "helper_scripts" folder. 
 

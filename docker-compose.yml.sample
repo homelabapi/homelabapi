@@ -1,17 +1,17 @@
-version: "3"
+---
+version: "3.7"
 
 services:
 
-  api:
-    build:
-      context: ./
-    container_name: homelab_api
+  homelabapi:
+    image: homelabapi/homelabapi:latest
+    container_name: homelabapi
+    environment:
+      - PUID=1001
+      - PGID=1001
+      - TZ=America/Vancouver
     ports:
       - "8090:80"
     restart: unless-stopped
-    networks:
-      - main_network
-
-networks:
-  main_network:
-    driver: bridge
+    volumes:
+      - ./config.yaml:/code/app/config.yaml
