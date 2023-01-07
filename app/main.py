@@ -14,7 +14,15 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 
-all_outputs = ("discord", "email", "pushbullet", "pushover", "telegram", "webhook")
+all_outputs = (
+    "discord",
+    "email",
+    "gotify",
+    "pushbullet",
+    "pushover",
+    "telegram",
+    "webhook",
+)
 
 with open("/code/app/config.yaml", mode="rt", encoding="utf-8") as file:
     configuration = yaml.safe_load(file)
@@ -43,6 +51,8 @@ with open("/code/app/config.yaml", mode="rt", encoding="utf-8") as file:
                 outputs["discord"] = value
             case "email":
                 outputs["email"] = value
+            case "gotify":
+                outputs["gotify"] = value
             case "pushbullet":
                 outputs["pushbullet"] = value
             case "pushover":
@@ -1087,6 +1097,8 @@ def send_output(request_body, subject, message, url, priority):
                     send_discord(subject, message, url)
                 case "email":
                     send_email(subject, message, url)
+                case "gotify":
+                    send_gotify(subject, message, url, priority)
                 case "pushbullet":
                     send_pushbullet(subject, message, url)
                 case "pushover":
@@ -1153,6 +1165,32 @@ def send_email(subject, message, url):
             server.sendmail(
                 account["email_sender"], account["email_receiver"], full_message
             )
+
+
+def send_gotify(subject, message, url, priority):
+
+    full_message = ""
+
+    if message and message != "":
+        full_message = full_message + message
+
+    if url and url != "":
+        full_message = full_message + "\n\n" + url
+
+    data = {"title": subject, "message": full_message, "priority": priority}
+
+    for account in outputs["gotify"]:
+
+        full_url = account["url"] + "/message?token=" + account["token"]
+
+        try:
+
+            response = requests.post(full_url, data=data)
+            response.raise_for_status()
+
+        except requests.exceptions.RequestException as error:
+
+            raise SystemExit(error)
 
 
 def send_pushbullet(subject, message, url):

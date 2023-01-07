@@ -26,7 +26,7 @@ ChangeDetection.io, Headphones, HealthChecks, Home Assistant, LazyLibrarian, Rad
 
 Supported Outputs
 -----------------
-Discord, Email, Pushbullet, Pushover, Telegram, Any POST Webhook
+Discord, Email, Gotify, Pushbullet, Pushover, Telegram, Any POST Webhook
 
 Installation
 ------------

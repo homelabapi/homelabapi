@@ -17,6 +17,10 @@ outputs:
       password: "0j987ihg654fed321cba"
       email_sender: "from@example.com"
       email_receiver: "to@example.com"
+  gotify:
+    - name: "Gotify"
+      url: "https://gotify.example.com:8000"
+      token: "AFVifxlxE.XLxwN"
   pushbullet:
     - name: "Pushbullet"
       api_key: "f456ghi789j0abc123def456g"
@@ -30,4 +34,4 @@ outputs:
       user_id: "1234567890"
   webhook:
     - name: "Webhook"
-      url: "http://api.example.com/receive-homelabapi-output"
+      url: "https://api.example.com/receive-homelabapi-output"
