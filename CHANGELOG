@@ -1,5 +1,9 @@
 HomelabAPI CHANGELOG
 ====================
+v0.5.0      2023-01-06
+- Added output support for ntfy.sh
+- Migrated to new official HomelabAPI docker image
+
 v0.4.0      2023-01-06
 - Added output support for Gotify
 
