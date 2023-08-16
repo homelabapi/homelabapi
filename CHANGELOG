@@ -1,5 +1,8 @@
 HomelabAPI CHANGELOG
 ====================
+v0.6.1      2023-08-15
+- Fixed Matrix room output support
+
 v0.6.0      2023-08-15
 - Added output support for Matrix rooms
 
