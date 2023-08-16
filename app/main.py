@@ -2,6 +2,7 @@ import json
 import requests
 import smtplib
 import ssl
+import uuid
 import yaml
 from fastapi import FastAPI, Request, status
 from fastapi.openapi.docs import (
@@ -18,6 +19,7 @@ all_outputs = (
     "discord",
     "email",
     "gotify",
+    "matrix",
     "ntfysh",
     "pushbullet",
     "pushover",
@@ -54,6 +56,8 @@ with open("/code/app/config.yaml", mode="rt", encoding="utf-8") as file:
                 outputs["email"] = value
             case "gotify":
                 outputs["gotify"] = value
+            case "matrix":
+                outputs["matrix"] = value
             case "ntfysh":
                 outputs["ntfysh"] = value
             case "pushbullet":
@@ -1102,6 +1106,8 @@ def send_output(request_body, subject, message, url, priority):
                     send_email(subject, message, url)
                 case "gotify":
                     send_gotify(subject, message, url, priority)
+                case "matrix":
+                    send_matrix(message)
                 case "ntfysh":
                     send_ntfysh(subject, message, url, priority)
                 case "pushbullet":
@@ -1191,6 +1197,41 @@ def send_gotify(subject, message, url, priority):
         try:
 
             response = requests.post(full_url, data=data)
+            response.raise_for_status()
+
+        except requests.exceptions.RequestException as error:
+
+            raise SystemExit(error)
+
+
+def send_matrix(message):
+
+    full_message = ""
+
+    if message and message != "":
+        full_message += "\n" + message
+
+    headers = {
+        "Content-Type": "application/json",
+    }
+
+    for account in outputs["matrix"]:
+
+        data = json.dumps({"msgtype": "m.text", "body": full_message})
+
+        try:
+
+            random_string = uuid.uuid4()
+
+            response = requests.post(
+                account["url"]
+                + "/_matrix/client/r0/rooms/"
+                + account["room"]
+                + "/send/m.room.message/"
+                + random_string,
+                headers=headers,
+                data=data,
+            )
             response.raise_for_status()
 
         except requests.exceptions.RequestException as error:

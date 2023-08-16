@@ -21,6 +21,10 @@ outputs:
     - name: "Gotify"
       url: "https://gotify.example.com:8000"
       token: "AFVifxlxE.XLxwN"
+  matrix:
+    - name: "Matrix"
+      url: "https://matrix.org"
+      room: "!abc123def456ghi789j0:matrix.org"
   ntfysh:
     - name: "ntfy.sh"
       topic: "abc123def456ghi789j0"
