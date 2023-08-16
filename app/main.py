@@ -1221,17 +1221,20 @@ def send_matrix(message):
 
         try:
 
-            random_string = uuid.uuid4()
+            random_string = str(uuid.uuid4())
 
-            response = requests.post(
+            full_url = (
                 account["url"]
                 + "/_matrix/client/r0/rooms/"
                 + account["room"]
                 + "/send/m.room.message/"
-                + random_string,
-                headers=headers,
-                data=data,
+                + random_string
+                + "?access_token="
+                + account["token"]
             )
+
+            response = requests.put(full_url, data=data, headers=headers)
+
             response.raise_for_status()
 
         except requests.exceptions.RequestException as error:
