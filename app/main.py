@@ -1107,7 +1107,7 @@ def send_output(request_body, subject, message, url, priority):
                 case "gotify":
                     send_gotify(subject, message, url, priority)
                 case "matrix":
-                    send_matrix(message)
+                    send_matrix(subject, message, url)
                 case "ntfysh":
                     send_ntfysh(subject, message, url, priority)
                 case "pushbullet":
@@ -1126,16 +1126,7 @@ def send_output(request_body, subject, message, url, priority):
 
 def send_discord(subject, message, url):
 
-    full_message = ""
-
-    if subject and subject != "":
-        full_message += subject
-
-    if message and message != "":
-        full_message += "\n" + message
-
-    if url and url != "":
-        full_message += "\n\n" + url
+    full_message = build_message("discord", subject, message, url, "", "")
 
     headers = {
         "Content-Type": "application/json",
@@ -1159,13 +1150,14 @@ def send_email(subject, message, url):
 
     for account in outputs["email"]:
 
-        full_message = "From: " + account["email_sender"] + "\n"
-        full_message += "To: " + account["email_receiver"] + "\n"
-        full_message += "Subject: " + subject + "\n\n"
-        full_message += message
-
-        if url and url != "":
-            full_message += "\n\n" + url
+        full_message = build_message(
+            "email",
+            subject,
+            message,
+            url,
+            account["email_sender"],
+            account["email_receiver"],
+        )
 
         if account["protocol"] == "tls":
 
@@ -1180,13 +1172,7 @@ def send_email(subject, message, url):
 
 def send_gotify(subject, message, url, priority):
 
-    full_message = ""
-
-    if message and message != "":
-        full_message = full_message + message
-
-    if url and url != "":
-        full_message = full_message + "\n\n" + url
+    full_message = build_message("gotify", subject, message, url, "", "")
 
     data = {"title": subject, "message": full_message, "priority": priority}
 
@@ -1204,12 +1190,9 @@ def send_gotify(subject, message, url, priority):
             raise SystemExit(error)
 
 
-def send_matrix(message):
+def send_matrix(subject, message, url):
 
-    full_message = ""
-
-    if message and message != "":
-        full_message += "\n" + message
+    full_message = build_message("matrix", subject, message, url, "", "")
 
     headers = {
         "Content-Type": "application/json",
@@ -1326,16 +1309,7 @@ def send_pushover(subject, message, url, priority):
 
 def send_telegram(subject, message, url):
 
-    full_message = ""
-
-    if subject and subject != "":
-        full_message = "<strong>" + subject + "</strong>"
-
-    if message and message != "":
-        full_message = full_message + "\n" + message
-
-    if url and url != "":
-        full_message = full_message + "\n\n" + url
+    full_message = build_message("telegram", subject, message, url, "", "")
 
     for account in outputs["telegram"]:
 
@@ -1374,3 +1348,41 @@ def send_webhook(json):
         except requests.exceptions.RequestException as error:
 
             raise SystemExit(error)
+
+
+def build_message(type, subject, message, url, email_sender, email_receiver):
+
+    full_message = ""
+
+    # SUBJECT
+    if subject and subject != "":
+
+        if type == "telegram":
+
+            full_message += "<strong>" + subject + "</strong>"
+
+        elif type == "discord" or type == "matrix":
+
+            full_message += subject
+
+    # COMMON
+    if type == "discord" or type == "gotify" or type == "matrix" or type == "telegram":
+
+        if message and message != "":
+            full_message += "\n" + message
+
+        if url and url != "":
+            full_message += "\n\n" + url
+
+    # EMAIL
+    if type == "email":
+
+        full_message = "From: " + email_sender + "\n"
+        full_message += "To: " + email_receiver + "\n"
+        full_message += "Subject: " + subject + "\n\n"
+        full_message += message
+
+        if url and url != "":
+            full_message += "\n\n" + url
+
+    return full_message
