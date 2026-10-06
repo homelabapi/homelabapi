@@ -1,5 +1,7 @@
 HomelabAPI
 ----------
+[![ACR B0a](https://img.shields.io/badge/ACR-B0a-2140B5)](ACR.md)
+
 Project Home: <https://homelabapi.org>  
 Project Demo: <https://demo.homelabapi.org>  
 Source Code: <https://homelabapi.org/source/>
