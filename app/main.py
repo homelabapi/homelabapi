@@ -13,7 +13,7 @@ from fastapi.openapi.docs import (
     get_swagger_ui_html,
     get_swagger_ui_oauth2_redirect_html,
 )
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field, ValidationError
@@ -42,13 +42,16 @@ with open("/code/app/config.yaml", mode="rt", encoding="utf-8") as file:
             case "api_key":
                 app_api_key = value
             case "current_outputs":
+                # Ignore spaces around the output names, such as "telegram, email"
                 if "," in value:
-                    current_outputs = value.split(",")
+                    current_outputs = [
+                        output.strip() for output in value.split(",") if output.strip()
+                    ]
                 else:
-                    if value == "all":
+                    if value.strip() == "all":
                         current_outputs = all_outputs
                     else:
-                        current_outputs = [value]
+                        current_outputs = [value.strip()]
 
     outputs = {}
     output_settings = configuration["outputs"]
@@ -74,7 +77,7 @@ with open("/code/app/config.yaml", mode="rt", encoding="utf-8") as file:
                 outputs["webhook"] = value
 
 app_dir = "app"
-api_version = "0.8.1"
+api_version = "0.9.0"
 
 api_description = "Welcome to " + api_title + "."
 input_success = "Success! Your input request was accepted by " + api_title
@@ -331,6 +334,14 @@ app.mount("/assets", StaticFiles(directory="assets"), name="assets")
 templates = Jinja2Templates(directory="templates")
 
 
+def invalid_api_key():
+
+    return JSONResponse(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        content={"result": "Invalid API Key (" + str(status.HTTP_401_UNAUTHORIZED) + ")"},
+    )
+
+
 @app.head(
     "/",
     tags=["Documentation"],
@@ -461,7 +472,7 @@ async def default_input(
 
     else:
 
-        return {"result": "Invalid API Key (" + str(status.HTTP_401_UNAUTHORIZED) + ")"}
+        return invalid_api_key()
 
 
 @app.post(
@@ -533,7 +544,7 @@ def healthchecks(payload: HealthChecksModel):
 
     else:
 
-        return {"result": "Invalid API Key (" + str(status.HTTP_401_UNAUTHORIZED) + ")"}
+        return invalid_api_key()
 
 
 @app.post(
@@ -643,7 +654,7 @@ async def monit(payload: MonitModel):
 
     else:
 
-        return {"result": "Invalid API Key (" + str(status.HTTP_401_UNAUTHORIZED) + ")"}
+        return invalid_api_key()
 
 
 @app.post(
@@ -715,7 +726,7 @@ def smokeping(payload: SmokePingModel):
 
     else:
 
-        return {"result": "Invalid API Key (" + str(status.HTTP_401_UNAUTHORIZED) + ")"}
+        return invalid_api_key()
 
 
 @app.post(
@@ -844,7 +855,7 @@ async def uptimerobot(payload: UptimeRobotModel):
 
     else:
 
-        return {"result": "Invalid API Key (" + str(status.HTTP_401_UNAUTHORIZED) + ")"}
+        return invalid_api_key()
 
 
 @app.post(
@@ -877,7 +888,7 @@ async def webhook_changedetectionio(api_key: str, payload: Request):
 
     else:
 
-        return {"result": "Invalid API Key (" + str(status.HTTP_401_UNAUTHORIZED) + ")"}
+        return invalid_api_key()
 
 
 @app.post(
@@ -904,7 +915,7 @@ async def webhook_headphones(api_key: str, payload: Request):
 
     else:
 
-        return {"result": "Invalid API Key (" + str(status.HTTP_401_UNAUTHORIZED) + ")"}
+        return invalid_api_key()
 
 
 @app.post(
@@ -931,7 +942,7 @@ async def webhook_homeassistant(api_key: str, payload: Request):
 
     else:
 
-        return {"result": "Invalid API Key (" + str(status.HTTP_401_UNAUTHORIZED) + ")"}
+        return invalid_api_key()
 
 
 @app.post(
@@ -958,7 +969,7 @@ async def webhook_lazylibrarian(api_key: str, payload: Request):
 
     else:
 
-        return {"result": "Invalid API Key (" + str(status.HTTP_401_UNAUTHORIZED) + ")"}
+        return invalid_api_key()
 
 
 @app.post(
@@ -991,7 +1002,7 @@ async def webhook_radarr(api_key: str, payload: Request):
 
     else:
 
-        return {"result": "Invalid API Key (" + str(status.HTTP_401_UNAUTHORIZED) + ")"}
+        return invalid_api_key()
 
 
 @app.post(
@@ -1069,7 +1080,7 @@ async def webhook_sonarr(api_key: str, payload: Request):
 
     else:
 
-        return {"result": "Invalid API Key (" + str(status.HTTP_401_UNAUTHORIZED) + ")"}
+        return invalid_api_key()
 
 
 @app.post(
@@ -1096,7 +1107,7 @@ async def webhook_synology(api_key: str, payload: Request):
 
     else:
 
-        return {"result": "Invalid API Key (" + str(status.HTTP_401_UNAUTHORIZED) + ")"}
+        return invalid_api_key()
 
 
 @app.post(
@@ -1140,7 +1151,7 @@ async def webhook_tailscale(api_key: str, payload: Request):
 
     else:
 
-        return {"result": "Invalid API Key (" + str(status.HTTP_401_UNAUTHORIZED) + ")"}
+        return invalid_api_key()
 
 
 def send_output(request_body, subject, message, url, priority):
@@ -1222,12 +1233,32 @@ def send_email(subject, message, url):
             account["email_receiver"],
         )
 
-        if account["protocol"] == "tls":
+        protocol = account["protocol"]
+        port = int(account["port"])
 
-            context = ssl.create_default_context()
-            server = smtplib.SMTP(account["server"], int(account["port"]))
-            server.starttls(context=context)
-            server.login(account["username"], account["password"])
+        # "tls" upgrades a plain connection (usually port 587), "ssl" is encrypted
+        # from the start (usually port 465), and "none" isn't encrypted at all
+        if protocol == "ssl":
+            server = smtplib.SMTP_SSL(
+                account["server"],
+                port,
+                context=ssl.create_default_context(),
+                timeout=30,
+            )
+        elif protocol in ("tls", "none"):
+            server = smtplib.SMTP(account["server"], port, timeout=30)
+        else:
+            raise ValueError("Unknown email protocol: " + protocol)
+
+        with server:
+
+            if protocol == "tls":
+                server.starttls(context=ssl.create_default_context())
+
+            # Some local mail relays don't need a login
+            if account.get("username"):
+                server.login(account["username"], account["password"])
+
             server.sendmail(
                 account["email_sender"], account["email_receiver"], full_message
             )

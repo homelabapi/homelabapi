@@ -25,24 +25,20 @@ docker compose up
 
 Everything lives in `app/main.py`, in this order:
 
-1. **Config load** (module level): reads `application` (`api_name`, `api_key`, `current_outputs`) and `outputs`. `current_outputs` is a comma-separated string or `"all"`; it becomes a list that `send_output` iterates. Each output key maps to a *list* of accounts, and every sender loops over all of them.
+1. **Config load** (module level): reads `application` (`api_name`, `api_key`, `current_outputs`) and `outputs`. `current_outputs` is a comma-separated string (spaces around names are stripped, empty entries dropped) or `"all"`; it becomes a list that `send_output` iterates. Each output key maps to a *list* of accounts, and every sender loops over all of them.
 2. **Pydantic models**: `CommonModel` (`api_key`, `subject`, `message`, `url`, `priority`, `source`) plus per-service subclasses whose `schema_extra` examples merge `CommonModel`'s example dict. Sample values come from the `sample_*` constants near the top.
 3. **Two kinds of input endpoints:**
    - *Service endpoints* (`/input`, `/healthchecks`, `/monit`, `/smokeping`, `/uptimerobot`): typed JSON body with `api_key` in the body. Each appends its extra fields to `message` as `label: value` lines, then calls `send_output`. `/input` also accepts its fields as URL query parameters when there's no JSON body (the body wins if both are sent); it builds an `InputModel` from them and raises `RequestValidationError` with `query`-prefixed locations on missing fields, so the 422 looks like FastAPI's own query validation errors. It's POST only.
    - *Service webhooks* (`/<service>/{api_key}`): `api_key` in the path, raw `Request` body parsed by hand, because those services' payload formats are fixed.
-4. **`send_output(request_body, subject, message, url, priority)`**: dispatches to `send_<output>()` for each entry in `current_outputs`. A failing output (senders raise `SystemExit` on HTTP errors) is caught, logged to stdout with only the output name and exception type (error text can contain token-bearing URLs), and the remaining outputs are still tried. `send_webhook` forwards the request body (service webhooks pass the parsed JSON; typed endpoints pass `payload.dict(exclude={"api_key"})`, after their extra fields have been appended to `message`); the others use subject, message, url, and priority.
+4. **`send_output(request_body, subject, message, url, priority)`**: dispatches to `send_<output>()` for each entry in `current_outputs`. A failing output (senders raise `SystemExit` on HTTP errors) is caught, logged to stdout with only the output name and exception type (error text can contain token-bearing URLs), and the remaining outputs are still tried. `send_webhook` forwards the request body (service webhooks pass the parsed JSON; typed endpoints pass `payload.dict(exclude={"api_key"})`, after their extra fields have been appended to `message`); the others use subject, message, url, and priority. `send_email` takes `protocol` `tls` (STARTTLS), `ssl` (encrypted from the start), or `none`, raises `ValueError` for anything else, and only logs in when `username` is set.
 5. **`build_message(type, ...)`**: formats the text body per output (Telegram gets HTML `<strong>` subjects, with the subject, message, and url HTML-escaped first because it uses `parse_mode: "HTML"`; email gets raw RFC 822 headers).
 
-Auth is a plain string compare against `app_api_key`. A bad key still returns HTTP 200, with `{"result": "Invalid API Key (401)"}`, and errors inside a handler return 200 with `input_failure` (request validation errors still return FastAPI's 422).
+Auth is a plain string compare against `app_api_key`. A bad key returns HTTP 401 via `invalid_api_key()`, with `{"result": "Invalid API Key (401)"}`. Errors inside a handler return 200 with `input_failure`, and request validation errors return FastAPI's 422. Note that `send_output` swallows output failures, so a successful result doesn't mean every output delivered.
 
 ### Adding an input or output
 
 - **Input**: add a `desc_*` (and `subject_*` if needed) constant, a model if it's a typed endpoint, and a route tagged `"Service Endpoints"` or `"Service Webhooks"`. Then update the Supported Inputs list in `README.md`.
 - **Output**: add the name to `all_outputs`, a `case` in the config loop and in `send_output`, a `send_<name>()` function, a `build_message` branch if it needs formatting, and a sample block in `config.yaml.sample`. Then update Supported Outputs in `README.md`.
-
-### Known quirks (existing behaviour, not intentional design)
-
-- `send_email` only handles `protocol: "tls"`.
 
 ## Releases
 

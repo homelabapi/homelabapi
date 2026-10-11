@@ -11,7 +11,7 @@ outputs:
   email:
     - name: "Email"
       server: "mail.example.com"
-      protocol: "tls"
+      protocol: "tls"  # tls (usually port 587), ssl (usually port 465), or none
       port: "587"
       username: "abc123def456ghi789j0"
       password: "0j987ihg654fed321cba"

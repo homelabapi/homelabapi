@@ -1,5 +1,17 @@
 HomelabAPI CHANGELOG
 ====================
+v0.9.0      2026-10-10
+- Changed a wrong API key to return HTTP status 401 instead of 200
+  (the response body is unchanged), so tools that check the status
+  code now see the failure
+- Added ssl (usually port 465) and none as email protocols, alongside
+  tls; an unknown protocol is now logged as a failed output instead of
+  silently sending nothing
+- Fixed the email output never closing its connection, and made the
+  login optional for mail relays that don't need one
+- Fixed outputs in current_outputs being skipped when there are
+  spaces around the names, such as "telegram, email"
+
 v0.8.1      2026-10-10
 - Fixed Telegram rejecting messages that contain <, >, or & by
   escaping them before sending
