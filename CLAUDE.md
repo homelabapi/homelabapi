@@ -30,8 +30,8 @@ Everything lives in `app/main.py`, in this order:
 3. **Two kinds of input endpoints:**
    - *Service endpoints* (`/input`, `/healthchecks`, `/monit`, `/smokeping`, `/uptimerobot`): typed JSON body with `api_key` in the body. Each appends its extra fields to `message` as `label: value` lines, then calls `send_output`. `/input` also accepts its fields as URL query parameters when there's no JSON body (the body wins if both are sent); it builds an `InputModel` from them and raises `RequestValidationError` with `query`-prefixed locations on missing fields, so the 422 looks like FastAPI's own query validation errors. It's POST only.
    - *Service webhooks* (`/<service>/{api_key}`): `api_key` in the path, raw `Request` body parsed by hand, because those services' payload formats are fixed.
-4. **`send_output(request_body, subject, message, url, priority)`**: dispatches to `send_<output>()` for each entry in `current_outputs`. `send_webhook` forwards the request body (service webhooks pass the parsed JSON; typed endpoints pass `payload.dict(exclude={"api_key"})`, after their extra fields have been appended to `message`); the others use subject, message, url, and priority.
-5. **`build_message(type, ...)`**: formats the text body per output (Telegram gets HTML `<strong>` subjects, email gets raw RFC 822 headers).
+4. **`send_output(request_body, subject, message, url, priority)`**: dispatches to `send_<output>()` for each entry in `current_outputs`. A failing output (senders raise `SystemExit` on HTTP errors) is caught, logged to stdout with only the output name and exception type (error text can contain token-bearing URLs), and the remaining outputs are still tried. `send_webhook` forwards the request body (service webhooks pass the parsed JSON; typed endpoints pass `payload.dict(exclude={"api_key"})`, after their extra fields have been appended to `message`); the others use subject, message, url, and priority.
+5. **`build_message(type, ...)`**: formats the text body per output (Telegram gets HTML `<strong>` subjects, with the subject, message, and url HTML-escaped first because it uses `parse_mode: "HTML"`; email gets raw RFC 822 headers).
 
 Auth is a plain string compare against `app_api_key`. A bad key still returns HTTP 200, with `{"result": "Invalid API Key (401)"}`, and errors inside a handler return 200 with `input_failure` (request validation errors still return FastAPI's 422).
 
@@ -42,8 +42,6 @@ Auth is a plain string compare against `app_api_key`. A bad key still returns HT
 
 ### Known quirks (existing behaviour, not intentional design)
 
-- `send_output` wraps each sender in a bare `except` that returns early, so any exception in one output (including the `SystemExit` the senders raise on HTTP errors, or a `KeyError` from a missing config key) stops the remaining outputs from being tried.
-- `send_matrix` reads `account["token"]`, but `config.yaml.sample` has no `token` for Matrix.
 - `send_email` only handles `protocol: "tls"`.
 
 ## Releases

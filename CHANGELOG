@@ -1,6 +1,11 @@
 HomelabAPI CHANGELOG
 ====================
-Unreleased
+v0.8.1      2026-10-10
+- Fixed Telegram rejecting messages that contain <, >, or & by
+  escaping them before sending
+- Fixed one failing output stopping the remaining outputs from being
+  sent; failures are now logged with the output name and error type
+- Added the missing Matrix token setting to config.yaml.sample
 - Removed an incorrect note from CLAUDE.md that said /sonarr always
   fails
 

@@ -25,6 +25,7 @@ outputs:
     - name: "Matrix"
       url: "https://matrix.org"
       room: "!abc123def456ghi789j0:matrix.org"
+      token: "syt_abc123def456ghi789j0"
   ntfysh:
     - name: "ntfy.sh"
       topic: "abc123def456ghi789j0"

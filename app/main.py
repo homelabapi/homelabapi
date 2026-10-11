@@ -1,3 +1,4 @@
+import html
 import json
 import requests
 import smtplib
@@ -73,7 +74,7 @@ with open("/code/app/config.yaml", mode="rt", encoding="utf-8") as file:
                 outputs["webhook"] = value
 
 app_dir = "app"
-api_version = "0.8.0"
+api_version = "0.8.1"
 
 api_description = "Welcome to " + api_title + "."
 input_success = "Success! Your input request was accepted by " + api_title
@@ -1144,6 +1145,8 @@ async def webhook_tailscale(api_key: str, payload: Request):
 
 def send_output(request_body, subject, message, url, priority):
 
+    failed = False
+
     for output in current_outputs:
 
         try:
@@ -1168,9 +1171,20 @@ def send_output(request_body, subject, message, url, priority):
                 case "webhook":
                     send_webhook(request_body)
 
-        except:
+        except (Exception, SystemExit) as error:
 
-            return status.HTTP_400_BAD_REQUEST
+            # Keep going, so one failing output doesn't stop the others from being sent
+            failed = True
+
+            # Log only the exception type, as error text can include URLs with tokens
+            cause = error.code if isinstance(error, SystemExit) else error
+            print(
+                "Output '" + output + "' failed (" + type(cause).__name__ + ")",
+                flush=True,
+            )
+
+    if failed:
+        return status.HTTP_400_BAD_REQUEST
 
 
 def send_discord(subject, message, url):
@@ -1402,6 +1416,12 @@ def send_webhook(json):
 def build_message(type, subject, message, url, email_sender, email_receiver):
 
     full_message = ""
+
+    # Telegram parses the message as HTML, so escape <, >, and & in the content
+    if type == "telegram":
+        subject = html.escape(subject, quote=False) if subject else subject
+        message = html.escape(message, quote=False) if message else message
+        url = html.escape(url, quote=False) if url else url
 
     # SUBJECT
     if subject and subject != "":
