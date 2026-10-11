@@ -1,7 +1,7 @@
 ---
 rating: B0a
 spec: "0.1"
-updated: 2026-10-06
+updated: 2026-10-10
 ---
 
 # AI Code Rating
@@ -12,4 +12,4 @@ This project is rated with [AI Code Rating](https://aicoderating.com/spec/0.1/),
 
 ## How AI Was Used
 
-None of HomelabAPI's code was written by AI. Greg Chetcuti wrote all of it by hand, without AI tools of any kind.
+None of HomelabAPI's code was written by AI. Greg Chetcuti wrote all of it by hand. Since October 2026, Claude Code has helped with documentation such as `CLAUDE.md`, and Codex reviews changes before they're committed; neither affects the rating, which covers code only.
