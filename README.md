@@ -1,6 +1,6 @@
 HomelabAPI
 ----------
-[![ACR B0a](https://img.shields.io/badge/ACR-B0a-2140B5)](ACR.md)
+[![ACR B1b](https://img.shields.io/badge/ACR-B1b-2140B5)](ACR.md)
 
 Project Home: <https://homelabapi.org>  
 Project Demo: <https://demo.homelabapi.org>  
@@ -46,6 +46,7 @@ Configuration
 -------------
 - You can send to multiple outputs by modifying the "current_outputs" variable. Separate multiple outputs by commas, or use "all" to send to every configured output.
 - Certain services require a script to run in order to send information to HomelabAPI, such as Monit and SmokePing. Some fully functional example scripts can be found in the "helper_scripts" folder. 
+- If a service can't send a JSON body, the default "/input" endpoint also accepts its values as URL parameters on a POST request, for example `curl -X POST "https://homelabapi.example.com/input?api_key=YOUR_API_KEY&subject=Backup&message=Backup%20finished"`. Remember to URL-encode the values. Your API key will be part of the URL, so it may show up in proxy and server logs.
 
 Contributing
 ------------

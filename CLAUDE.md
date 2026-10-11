@@ -28,9 +28,9 @@ Everything lives in `app/main.py`, in this order:
 1. **Config load** (module level): reads `application` (`api_name`, `api_key`, `current_outputs`) and `outputs`. `current_outputs` is a comma-separated string or `"all"`; it becomes a list that `send_output` iterates. Each output key maps to a *list* of accounts, and every sender loops over all of them.
 2. **Pydantic models**: `CommonModel` (`api_key`, `subject`, `message`, `url`, `priority`, `source`) plus per-service subclasses whose `schema_extra` examples merge `CommonModel`'s example dict. Sample values come from the `sample_*` constants near the top.
 3. **Two kinds of input endpoints:**
-   - *Service endpoints* (`/input`, `/healthchecks`, `/monit`, `/smokeping`, `/uptimerobot`): typed JSON body with `api_key` in the body. Each appends its extra fields to `message` as `label: value` lines, then calls `send_output`.
+   - *Service endpoints* (`/input`, `/healthchecks`, `/monit`, `/smokeping`, `/uptimerobot`): typed JSON body with `api_key` in the body. Each appends its extra fields to `message` as `label: value` lines, then calls `send_output`. `/input` also accepts its fields as URL query parameters when there's no JSON body (the body wins if both are sent); it builds an `InputModel` from them and raises `RequestValidationError` with `query`-prefixed locations on missing fields, so the 422 looks like FastAPI's own query validation errors. It's POST only.
    - *Service webhooks* (`/<service>/{api_key}`): `api_key` in the path, raw `Request` body parsed by hand, because those services' payload formats are fixed.
-4. **`send_output(request_body, subject, message, url, priority)`**: dispatches to `send_<output>()` for each entry in `current_outputs`. `send_webhook` forwards the original request body; the others use subject, message, url, and priority.
+4. **`send_output(request_body, subject, message, url, priority)`**: dispatches to `send_<output>()` for each entry in `current_outputs`. `send_webhook` forwards the request body (service webhooks pass the parsed JSON; typed endpoints pass `payload.dict(exclude={"api_key"})`, after their extra fields have been appended to `message`); the others use subject, message, url, and priority.
 5. **`build_message(type, ...)`**: formats the text body per output (Telegram gets HTML `<strong>` subjects, email gets raw RFC 822 headers).
 
 Auth is a plain string compare against `app_api_key`. A bad key still returns HTTP 200, with `{"result": "Invalid API Key (401)"}`, and errors inside a handler return 200 with `input_failure` (request validation errors still return FastAPI's 422).
@@ -44,11 +44,10 @@ Auth is a plain string compare against `app_api_key`. A bad key still returns HT
 
 - `send_output` wraps each sender in a bare `except` that returns early, so any exception in one output (including the `SystemExit` the senders raise on HTTP errors, or a `KeyError` from a missing config key) stops the remaining outputs from being tried.
 - `/sonarr` references `subject_sonarr`, which is never defined, so it always fails.
-- `/input` passes `payload.json` (the method) instead of `payload.json()` to `send_output`, so the `webhook` output gets a bound method rather than the body.
 - `send_matrix` reads `account["token"]`, but `config.yaml.sample` has no `token` for Matrix.
 - `send_email` only handles `protocol: "tls"`.
 
 ## Releases
 
 - Version lives in `api_version` in `app/main.py`; bump it and add an entry to `CHANGELOG` (plain text, no `.md`, newest first, `vX.Y.Z      YYYY-MM-DD` headings). Past releases did these as separate commits ("Update version number (vA -> vB)", then "Add vX.Y.Z to CHANGELOG").
-- `ACR.md` currently rates the project `B0a` (no AI-written code). If AI-written code is committed, the rating, the `updated` date, and the README badge need updating.
+- `ACR.md` rates the project `B1b` (AI Share 1–25%, Oversight Reviewed). If the AI share of the code or the oversight level changes, update the rating, the `updated` date, and the README badge together.

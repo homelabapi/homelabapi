@@ -1,10 +1,16 @@
 HomelabAPI CHANGELOG
 ====================
-Unreleased
+v0.8.0      2026-10-10
+- Added URL parameter support to the default /input endpoint (#5)
+- Fixed the webhook output for /input, which was passed a method
+  instead of the request body
+- Fixed the webhook output for /healthchecks, /monit, /smokeping, and
+  /uptimerobot sending a JSON-encoded string instead of a JSON object
+- Stopped the webhook output forwarding the HomelabAPI API key
 - Added CLAUDE.md with run, architecture, and release notes
 - Updated copyright notices to 2023-2026
 - Removed deprecated version key from docker-compose.yml.sample
-- Updated ACR.md to note AI help with docs and Codex review
+- Updated ACR.md to B1b for the first AI-written code
 
 v0.7.0      2023-08-27
 - Added Subject and URL support to Matrix room output

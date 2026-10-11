@@ -4,7 +4,9 @@ import smtplib
 import ssl
 import uuid
 import yaml
-from fastapi import FastAPI, Request, status
+from typing import Optional
+from fastapi import FastAPI, Query, Request, status
+from fastapi.exceptions import RequestValidationError
 from fastapi.openapi.docs import (
     get_redoc_html,
     get_swagger_ui_html,
@@ -13,7 +15,8 @@ from fastapi.openapi.docs import (
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
+from pydantic.error_wrappers import ErrorWrapper
 
 all_outputs = (
     "discord",
@@ -70,7 +73,7 @@ with open("/code/app/config.yaml", mode="rt", encoding="utf-8") as file:
                 outputs["webhook"] = value
 
 app_dir = "app"
-api_version = "0.7.0"
+api_version = "0.8.0"
 
 api_description = "Welcome to " + api_title + "."
 input_success = "Success! Your input request was accepted by " + api_title
@@ -78,7 +81,7 @@ input_failure = "Failure! Your input request was NOT accepted by " + api_title
 
 # Endpoint Descriptions
 desc_healthchecks = "Receive a POST request from HealthChecks"
-desc_input = "This is the default POST endpoint. This endpoint should be used if none of the service-specific endpoints or webhooks apply."
+desc_input = "This is the default POST endpoint. This endpoint should be used if none of the service-specific endpoints or webhooks apply. The values can be sent as a JSON body or, for tools that can't send a body, as URL parameters. If a JSON body is sent, the URL parameters are ignored."
 desc_monit = "Receive a POST request from Monit"
 desc_smokeping = "Receive a POST request from SmokePing"
 desc_uptimerobot = "Receive a POST request from UptimeRobot"
@@ -394,14 +397,54 @@ async def swagger_ui_redirect():
     status_code=status.HTTP_200_OK,
     include_in_schema=True,
 )
-async def default_input(payload: InputModel):
+async def default_input(
+    payload: Optional[InputModel] = None,
+    api_key: Optional[str] = Query(default=None, example=sample_api_key),
+    subject: Optional[str] = Query(default=None, example=sample_subject),
+    message: Optional[str] = Query(default=None, example=sample_message),
+    url: Optional[str] = Query(default=None, example=sample_url),
+    priority: Optional[str] = Query(default=None, example=sample_priority),
+    source: Optional[str] = Query(default=None, example=sample_source),
+):
+
+    # If there's no JSON body, build the payload from the URL parameters instead
+    if payload is None:
+
+        query_values = {
+            "api_key": api_key,
+            "subject": subject,
+            "message": message,
+            "url": url,
+            "priority": priority,
+            "source": source,
+        }
+
+        try:
+
+            payload = InputModel(
+                **{
+                    key: value
+                    for key, value in query_values.items()
+                    if value is not None
+                }
+            )
+
+        except ValidationError as error:
+
+            # Report the errors against the query string, like FastAPI does
+            raise RequestValidationError(
+                [
+                    ErrorWrapper(raw_error.exc, loc=("query",) + raw_error.loc_tuple())
+                    for raw_error in error.raw_errors
+                ]
+            )
 
     if payload.api_key == app_api_key:
 
         try:
 
             send_output(
-                payload.json,
+                payload.dict(exclude={"api_key"}),
                 payload.subject,
                 payload.message,
                 payload.url,
@@ -473,7 +516,7 @@ def healthchecks(payload: HealthChecksModel):
                 pass
 
             send_output(
-                payload.json(),
+                payload.dict(exclude={"api_key"}),
                 payload.subject,
                 payload.message,
                 payload.url,
@@ -582,7 +625,13 @@ async def monit(payload: MonitModel):
             except:
                 pass
 
-            send_output(payload.json(), payload.subject, payload.message, "", "")
+            send_output(
+                payload.dict(exclude={"api_key"}),
+                payload.subject,
+                payload.message,
+                "",
+                "",
+            )
             to_return = {"result": input_success}
 
         except Exception:
@@ -649,7 +698,7 @@ def smokeping(payload: SmokePingModel):
                 pass
 
             send_output(
-                payload.json(),
+                payload.dict(exclude={"api_key"}),
                 payload.subject,
                 payload.message,
                 payload.url,
@@ -778,7 +827,7 @@ async def uptimerobot(payload: UptimeRobotModel):
                 pass
 
             send_output(
-                payload.json(),
+                payload.dict(exclude={"api_key"}),
                 payload.subject,
                 payload.message,
                 payload.url,
