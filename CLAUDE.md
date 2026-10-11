@@ -43,7 +43,6 @@ Auth is a plain string compare against `app_api_key`. A bad key still returns HT
 ### Known quirks (existing behaviour, not intentional design)
 
 - `send_output` wraps each sender in a bare `except` that returns early, so any exception in one output (including the `SystemExit` the senders raise on HTTP errors, or a `KeyError` from a missing config key) stops the remaining outputs from being tried.
-- `/sonarr` references `subject_sonarr`, which is never defined, so it always fails.
 - `send_matrix` reads `account["token"]`, but `config.yaml.sample` has no `token` for Matrix.
 - `send_email` only handles `protocol: "tls"`.
 
