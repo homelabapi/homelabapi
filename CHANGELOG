@@ -4,6 +4,8 @@ Unreleased
 - Added a Dependabot config (.github/dependabot.yml) that checks the
   pinned Python packages in requirements.txt monthly, waits 7 days
   after a new release, and groups all updates into one pull request
+- Updated the release notes in CLAUDE.md: the version bump and the
+  CHANGELOG entry now go in the release commit, which gets a tag
 
 v0.10.0     2026-10-12
 - Upgraded to Python 3.14 (from 3.10), FastAPI 0.143 (from 0.85),

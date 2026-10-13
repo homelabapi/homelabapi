@@ -42,5 +42,5 @@ Auth is a plain string compare against `app_api_key`. A bad key returns HTTP 401
 
 ## Releases
 
-- Version lives in `api_version` in `app/main.py`; bump it and add an entry to `CHANGELOG` (plain text, no `.md`, newest first, `vX.Y.Z      YYYY-MM-DD` headings). Past releases did these as separate commits ("Update version number (vA -> vB)", then "Add vX.Y.Z to CHANGELOG").
+- Version lives in `api_version` in `app/main.py`; bump it and add an entry to `CHANGELOG` (plain text, no `.md`, newest first, `vX.Y.Z      YYYY-MM-DD` headings). Since v0.8.0, the version bump and the CHANGELOG entry go in the same commit as the change they release (releases before that used separate commits). Tag the release commit `vX.Y.Z`.
 - `ACR.md` rates the project `B1b` (AI Share 1–25%, Oversight Reviewed). If the AI share of the code or the oversight level changes, update the rating, the `updated` date, and the README badge together.
