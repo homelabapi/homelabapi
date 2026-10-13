@@ -1,5 +1,28 @@
 HomelabAPI CHANGELOG
 ====================
+v0.10.0     2026-10-12
+- Upgraded to Python 3.14 (from 3.10), FastAPI 0.143 (from 0.85),
+  Pydantic 2 (from 1), and uvicorn 0.54 (from 0.18), as Python 3.10
+  reaches end of life in October 2026. Python 3.10 still works for
+  self-built images (checked on amd64 for this release only)
+- Updated the bundled Swagger UI to 5.33.2 and ReDoc to 2.5.4, which
+  are needed to show the OpenAPI 3.1 document FastAPI now produces
+  (it was OpenAPI 3.0)
+- Pinned every installed package in requirements.txt, so an image
+  built from a release tag installs exactly what was tested
+- Removed the unused aiofiles and gjcode packages
+- Kept numbers sent to text fields (such as "priority": 1) and null
+  sent to optional fields working as before
+- Changed validation errors (HTTP 422) to Pydantic 2's format, such as
+  "type": "missing" and "msg": "Field required" instead of
+  "value_error.missing" and "field required", with the submitted input
+  included
+- Changed a true or false sent to a text field, such as
+  "priority": true, to be rejected with a 422 instead of becoming
+  "True" or "False"
+- Updated CLAUDE.md for the new stack
+- Updated ACR.md to describe the upgrade (the rating stays B1b)
+
 v0.9.0      2026-10-10
 - Changed a wrong API key to return HTTP status 401 instead of 200
   (the response body is unchanged), so tools that check the status

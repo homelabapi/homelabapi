@@ -1,8 +1,25 @@
-aiofiles
-fastapi>=0.85.0,<0.86.0
-gjcode>=0.0.13
-jinja2>=2.11.2,<4.0.0
-pydantic>=1.2.0,<2.0.0
-pyyaml>=6.0.0
-requests
-uvicorn>=0.12.0,<0.19.0
+# Every installed package is pinned, so an image built from a release tag
+# installs exactly what was tested. Direct dependencies: fastapi, jinja2,
+# pydantic, pyyaml, requests, and uvicorn.
+annotated-doc==0.0.5
+annotated-types==0.8.0
+anyio==4.15.1
+certifi==2026.7.22
+charset-normalizer==3.5.2
+click==8.5.0
+exceptiongroup==1.3.1; python_version < "3.11"
+fastapi==0.143.0
+h11==0.16.0
+idna==3.20
+Jinja2==3.1.6
+MarkupSafe==3.0.4
+opentelemetry-api==1.45.1
+pydantic==2.14.1
+pydantic_core==2.50.1
+PyYAML==6.0.3
+requests==2.34.2
+starlette==1.7.0
+typing-inspection==0.4.4
+typing_extensions==4.16.0
+urllib3==2.8.0
+uvicorn==0.54.0

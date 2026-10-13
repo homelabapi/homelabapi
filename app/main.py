@@ -10,14 +10,12 @@ from fastapi import FastAPI, Query, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.openapi.docs import (
     get_redoc_html,
-    get_swagger_ui_html,
     get_swagger_ui_oauth2_redirect_html,
 )
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel, Field, ValidationError
-from pydantic.error_wrappers import ErrorWrapper
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 all_outputs = (
     "discord",
@@ -77,7 +75,7 @@ with open("/code/app/config.yaml", mode="rt", encoding="utf-8") as file:
                 outputs["webhook"] = value
 
 app_dir = "app"
-api_version = "0.9.0"
+api_version = "0.10.0"
 
 api_description = "Welcome to " + api_title + "."
 input_success = "Success! Your input request was accepted by " + api_title
@@ -178,24 +176,19 @@ tags_metadata = [
 
 
 class CommonModel(BaseModel):
-    api_key: str = Field(example=sample_api_key)
-    subject: str = Field(default=sample_subject, example=sample_subject)
-    message: str = Field(example=sample_message)
-    url: str = Field(default=None, example=sample_url)
-    priority: str = Field(default=0, example=sample_priority)
-    source: str = Field(default=None, example=sample_source)
+    # Accept numbers for the string fields, such as "priority": 1, as Pydantic v1 did
+    model_config = ConfigDict(coerce_numbers_to_str=True)
 
-    class Config:
-        schema_extra = {
-            "example": {
-                "api_key": sample_api_key,
-                "subject": sample_subject,
-                "message": sample_message,
-                "url": sample_url,
-                "priority": sample_priority,
-                "source": sample_source,
-            }
-        }
+    # The examples are set on each field, rather than on the model, so the docs
+    # show them in field order (Pydantic sorts a model-level example's keys)
+    api_key: str = Field(examples=[sample_api_key])
+    subject: str = Field(default=sample_subject, examples=[sample_subject])
+    message: str = Field(examples=[sample_message])
+    url: Optional[str] = Field(default=None, examples=[sample_url])
+    # The default stays the number 0, as before, so outputs get the same value
+    # (model_dump() uses warnings=False, as Pydantic warns it isn't a string)
+    priority: str = Field(default=0, examples=[sample_priority])
+    source: Optional[str] = Field(default=None, examples=[sample_source])
 
 
 class InputModel(CommonModel):
@@ -203,115 +196,77 @@ class InputModel(CommonModel):
 
 
 class HealthChecksModel(CommonModel):
-    name: str = Field(default=None, example=sample_healthchecks_name)
-    status: str = Field(default=None, example=sample_healthchecks_status)
-    tags: str = Field(default=None, example=sample_healthchecks_tags)
-    time: str = Field(default=None, example=sample_healthchecks_time)
-    uuid: str = Field(default=None, example=sample_healthchecks_uuid)
-
-    class Config:
-        schema_extra = dict(
-            {
-                "example": {
-                    **CommonModel.Config.schema_extra["example"],
-                    **{"name": sample_healthchecks_name},
-                    **{"status": sample_healthchecks_status},
-                    **{"tags": sample_healthchecks_tags},
-                    **{"time": sample_healthchecks_time},
-                    **{"uuid": sample_healthchecks_uuid},
-                }
-            }
-        )
+    name: Optional[str] = Field(default=None, examples=[sample_healthchecks_name])
+    status: Optional[str] = Field(default=None, examples=[sample_healthchecks_status])
+    tags: Optional[str] = Field(default=None, examples=[sample_healthchecks_tags])
+    time: Optional[str] = Field(default=None, examples=[sample_healthchecks_time])
+    uuid: Optional[str] = Field(default=None, examples=[sample_healthchecks_uuid])
 
 
 class MonitModel(CommonModel):
-    action: str = Field(default=None, example=sample_monit_action)
-    date: str = Field(default=None, example=sample_monit_date)
-    description: str = Field(default=None, example=sample_monit_description)
-    event: str = Field(default=None, example=sample_monit_event)
-    host: str = Field(default=None, example=sample_monit_host)
-    process_children: str = Field(default=None, example=sample_monit_process_children)
-    process_cpu_percent: str = Field(
-        default=None, example=sample_monit_process_cpu_percent
+    action: Optional[str] = Field(default=None, examples=[sample_monit_action])
+    date: Optional[str] = Field(default=None, examples=[sample_monit_date])
+    description: Optional[str] = Field(
+        default=None, examples=[sample_monit_description]
     )
-    process_pid: str = Field(default=None, example=sample_monit_process_pid)
-    process_memory: str = Field(default=None, example=sample_monit_process_memory)
-    program_status: str = Field(default=None, example=sample_monit_program_status)
-    service: str = Field(default=None, example=sample_monit_service)
-
-    class Config:
-        schema_extra = {
-            "example": {
-                **CommonModel.Config.schema_extra["example"],
-                "action": sample_monit_action,
-                "date": sample_monit_date,
-                "description": sample_monit_description,
-                "event": sample_monit_event,
-                "host": sample_monit_host,
-                "process_children": sample_monit_process_children,
-                "process_cpu_percent": sample_monit_process_cpu_percent,
-                "process_pid": sample_monit_process_pid,
-                "process_memory": sample_monit_process_memory,
-                "program_status": sample_monit_program_status,
-                "service": sample_monit_service,
-            }
-        }
+    event: Optional[str] = Field(default=None, examples=[sample_monit_event])
+    host: Optional[str] = Field(default=None, examples=[sample_monit_host])
+    process_children: Optional[str] = Field(
+        default=None, examples=[sample_monit_process_children]
+    )
+    process_cpu_percent: Optional[str] = Field(
+        default=None, examples=[sample_monit_process_cpu_percent]
+    )
+    process_pid: Optional[str] = Field(
+        default=None, examples=[sample_monit_process_pid]
+    )
+    process_memory: Optional[str] = Field(
+        default=None, examples=[sample_monit_process_memory]
+    )
+    program_status: Optional[str] = Field(
+        default=None, examples=[sample_monit_program_status]
+    )
+    service: Optional[str] = Field(default=None, examples=[sample_monit_service])
 
 
 class SmokePingModel(CommonModel):
-    alertname: str = Field(default=None, example=sample_smokeping_alertname)
-    hostname: str = Field(default=None, example=sample_smokeping_hostname)
-    losspattern: str = Field(default=None, example=sample_smokeping_losspattern)
-    rtt: str = Field(default=None, example=sample_smokeping_rtt)
-    target: str = Field(default=None, example=sample_smokeping_target)
-
-    class Config:
-        schema_extra = dict(
-            {
-                "example": {
-                    **CommonModel.Config.schema_extra["example"],
-                    **{"alertname": sample_smokeping_alertname},
-                    **{"hostname": sample_smokeping_hostname},
-                    **{"losspattern": sample_smokeping_losspattern},
-                    **{"rtt": sample_smokeping_rtt},
-                    **{"target": sample_smokeping_target},
-                }
-            }
-        )
+    alertname: Optional[str] = Field(
+        default=None, examples=[sample_smokeping_alertname]
+    )
+    hostname: Optional[str] = Field(default=None, examples=[sample_smokeping_hostname])
+    losspattern: Optional[str] = Field(
+        default=None, examples=[sample_smokeping_losspattern]
+    )
+    rtt: Optional[str] = Field(default=None, examples=[sample_smokeping_rtt])
+    target: Optional[str] = Field(default=None, examples=[sample_smokeping_target])
 
 
 class UptimeRobotModel(CommonModel):
-    alertDateTime: str = Field(default=None, example=sample_uptimerobot_adt)
-    alertDetails: str = Field(default=None, example=sample_uptimerobot_ade)
-    alertDuration: str = Field(default=None, example=sample_uptimerobot_adu)
-    alertType: str = Field(default=None, example=sample_uptimerobot_at)
-    alertTypeFriendlyName: str = Field(default=None, example=sample_uptimerobot_atfn)
-    monitorAlertContacts: str = Field(default=None, example=sample_uptimerobot_mac)
-    monitorFriendlyName: str = Field(default=None, example=sample_uptimerobot_mfn)
-    monitorID: str = Field(default=None, example=sample_uptimerobot_mid)
-    monitorURL: str = Field(default=None, example=sample_uptimerobot_murl)
-    sslExpiryDate: str = Field(default=None, example=sample_uptimerobot_sed)
-    sslExpiryDaysLeft: str = Field(default=None, example=sample_uptimerobot_sedl)
-
-    class Config:
-        schema_extra = dict(
-            {
-                "example": {
-                    **CommonModel.Config.schema_extra["example"],
-                    **{"alertDateTime": sample_uptimerobot_adt},
-                    **{"alertDetails": sample_uptimerobot_ade},
-                    **{"alertDuration": sample_uptimerobot_adu},
-                    **{"alertType": sample_uptimerobot_at},
-                    **{"alertTypeFriendlyName": sample_uptimerobot_atfn},
-                    **{"monitorAlertContacts": sample_uptimerobot_mac},
-                    **{"monitorFriendlyName": sample_uptimerobot_mfn},
-                    **{"monitorID": sample_uptimerobot_mid},
-                    **{"monitorURL": sample_uptimerobot_murl},
-                    **{"sslExpiryDate": sample_uptimerobot_sed},
-                    **{"sslExpiryDaysLeft": sample_uptimerobot_sedl},
-                }
-            }
-        )
+    alertDateTime: Optional[str] = Field(
+        default=None, examples=[sample_uptimerobot_adt]
+    )
+    alertDetails: Optional[str] = Field(default=None, examples=[sample_uptimerobot_ade])
+    alertDuration: Optional[str] = Field(
+        default=None, examples=[sample_uptimerobot_adu]
+    )
+    alertType: Optional[str] = Field(default=None, examples=[sample_uptimerobot_at])
+    alertTypeFriendlyName: Optional[str] = Field(
+        default=None, examples=[sample_uptimerobot_atfn]
+    )
+    monitorAlertContacts: Optional[str] = Field(
+        default=None, examples=[sample_uptimerobot_mac]
+    )
+    monitorFriendlyName: Optional[str] = Field(
+        default=None, examples=[sample_uptimerobot_mfn]
+    )
+    monitorID: Optional[str] = Field(default=None, examples=[sample_uptimerobot_mid])
+    monitorURL: Optional[str] = Field(default=None, examples=[sample_uptimerobot_murl])
+    sslExpiryDate: Optional[str] = Field(
+        default=None, examples=[sample_uptimerobot_sed]
+    )
+    sslExpiryDaysLeft: Optional[str] = Field(
+        default=None, examples=[sample_uptimerobot_sedl]
+    )
 
 
 app = FastAPI(
@@ -357,9 +312,7 @@ def invalid_api_key():
     include_in_schema=False,
 )
 async def show_docs(request: Request):
-    return templates.TemplateResponse(
-        "index.html", {"request": request, "api_title": api_title}
-    )
+    return templates.TemplateResponse(request, "index.html", {"api_title": api_title})
 
 
 @app.get(
@@ -411,12 +364,12 @@ async def swagger_ui_redirect():
 )
 async def default_input(
     payload: Optional[InputModel] = None,
-    api_key: Optional[str] = Query(default=None, example=sample_api_key),
-    subject: Optional[str] = Query(default=None, example=sample_subject),
-    message: Optional[str] = Query(default=None, example=sample_message),
-    url: Optional[str] = Query(default=None, example=sample_url),
-    priority: Optional[str] = Query(default=None, example=sample_priority),
-    source: Optional[str] = Query(default=None, example=sample_source),
+    api_key: Optional[str] = Query(default=None, examples=[sample_api_key]),
+    subject: Optional[str] = Query(default=None, examples=[sample_subject]),
+    message: Optional[str] = Query(default=None, examples=[sample_message]),
+    url: Optional[str] = Query(default=None, examples=[sample_url]),
+    priority: Optional[str] = Query(default=None, examples=[sample_priority]),
+    source: Optional[str] = Query(default=None, examples=[sample_source]),
 ):
 
     # If there's no JSON body, build the payload from the URL parameters instead
@@ -444,19 +397,21 @@ async def default_input(
         except ValidationError as error:
 
             # Report the errors against the query string, like FastAPI does
-            raise RequestValidationError(
-                [
-                    ErrorWrapper(raw_error.exc, loc=("query",) + raw_error.loc_tuple())
-                    for raw_error in error.raw_errors
-                ]
-            )
+            query_errors = []
+            for raw_error in error.errors(include_url=False):
+                query_error = {**raw_error, "loc": ("query",) + raw_error["loc"]}
+                # FastAPI gives a missing query parameter an input of None
+                if query_error["type"] == "missing":
+                    query_error["input"] = None
+                query_errors.append(query_error)
+            raise RequestValidationError(query_errors)
 
     if payload.api_key == app_api_key:
 
         try:
 
             send_output(
-                payload.dict(exclude={"api_key"}),
+                payload.model_dump(exclude={"api_key"}, warnings=False),
                 payload.subject,
                 payload.message,
                 payload.url,
@@ -528,7 +483,7 @@ def healthchecks(payload: HealthChecksModel):
                 pass
 
             send_output(
-                payload.dict(exclude={"api_key"}),
+                payload.model_dump(exclude={"api_key"}, warnings=False),
                 payload.subject,
                 payload.message,
                 payload.url,
@@ -638,7 +593,7 @@ async def monit(payload: MonitModel):
                 pass
 
             send_output(
-                payload.dict(exclude={"api_key"}),
+                payload.model_dump(exclude={"api_key"}, warnings=False),
                 payload.subject,
                 payload.message,
                 "",
@@ -710,7 +665,7 @@ def smokeping(payload: SmokePingModel):
                 pass
 
             send_output(
-                payload.dict(exclude={"api_key"}),
+                payload.model_dump(exclude={"api_key"}, warnings=False),
                 payload.subject,
                 payload.message,
                 payload.url,
@@ -839,7 +794,7 @@ async def uptimerobot(payload: UptimeRobotModel):
                 pass
 
             send_output(
-                payload.dict(exclude={"api_key"}),
+                payload.model_dump(exclude={"api_key"}, warnings=False),
                 payload.subject,
                 payload.message,
                 payload.url,
