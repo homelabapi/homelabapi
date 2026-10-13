@@ -1,5 +1,10 @@
 HomelabAPI CHANGELOG
 ====================
+Unreleased
+- Added a Dependabot config (.github/dependabot.yml) that checks the
+  pinned Python packages in requirements.txt monthly, waits 7 days
+  after a new release, and groups all updates into one pull request
+
 v0.10.0     2026-10-12
 - Upgraded to Python 3.14 (from 3.10), FastAPI 0.143 (from 0.85),
   Pydantic 2 (from 1), and uvicorn 0.54 (from 0.18), as Python 3.10
