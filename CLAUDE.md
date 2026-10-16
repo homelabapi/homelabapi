@@ -19,7 +19,7 @@ docker compose up
 - `Dockerfile` is excluded via `.git/info/exclude` (not tracked), as are `config.yaml`, `docker-compose.yml`, `test.py`, and `README-PRIVATE.md`. Don't add them to commits; `config.yaml` and `test.py` hold real keys.
 - The Dockerfile copies `config.yaml` into the image, and the compose file also bind-mounts it over `/code/app/config.yaml`.
 - Swagger UI is served at `/` (custom `templates/index.html`, assets vendored in `assets/`), ReDoc at `/redoc`; `/docs` redirects to `/`.
-- Stack: Python 3.14 in the Docker image (the code uses `match`, so 3.10 is the minimum; 3.10 was last checked for v0.10.0), FastAPI, and Pydantic v2. `requirements.txt` pins every installed package (a `pip freeze` of the tested image, plus `exceptiongroup` marked for Python below 3.11), so keep it a full pin list rather than only the direct dependencies.
+- Stack: Python 3.14 in the Docker image (the code uses `match`, so 3.10 is the minimum; 3.10 was last checked for v0.10.0), FastAPI, and Pydantic v2. `requirements.txt` pins every installed package (a `pip freeze` of the tested image, plus `exceptiongroup` marked for Python below 3.11), so keep it a full pin list rather than only the direct dependencies. The app sets `strict_content_type=False` on purpose, so a JSON body sent with no Content-Type (as Healthchecks does) is parsed as it was before v0.10.0; don't remove it.
 
 ## Architecture
 

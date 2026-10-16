@@ -1,6 +1,14 @@
 HomelabAPI CHANGELOG
 ====================
-Unreleased
+v0.10.1     2026-10-15
+- Fixed requests whose JSON body has no Content-Type header, such as
+  Healthchecks webhooks, being rejected with a 422 since v0.10.0.
+  FastAPI now only parses a body as JSON when the request says it's
+  JSON; HomelabAPI turns that check off (strict_content_type=False),
+  so a body with no Content-Type is read as JSON again, as it was
+  before v0.10.0. Bodies sent as text/plain or form data are still
+  rejected, as they always were
+- Noted the strict_content_type setting in CLAUDE.md
 - Added a Dependabot config (.github/dependabot.yml) that checks the
   pinned Python packages in requirements.txt monthly, waits 7 days
   after a new release, and groups all updates into one pull request
