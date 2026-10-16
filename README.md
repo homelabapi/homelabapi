@@ -3,8 +3,7 @@ HomelabAPI
 [![ACR B1b](https://img.shields.io/badge/ACR-B1b-2140B5)](ACR.md)
 
 Project Home: <https://homelabapi.org>  
-Project Demo: <https://demo.homelabapi.org>  
-Source Code: <https://homelabapi.org/source/>
+Project Demo: <https://demo.homelabapi.org>
 
 What is HomelabAPI?
 -------------------

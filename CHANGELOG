@@ -1,5 +1,10 @@
 HomelabAPI CHANGELOG
 ====================
+Unreleased
+- Removed the "Source Code" link (https://homelabapi.org/source/) from
+  README.md. homelabapi.org redirects to GitHub and keeps the path, so
+  the link led to a GitHub 404
+
 v0.11.1     2026-10-15
 - Renamed the GitHub repository and Docker image from homelab-api to
   homelabapi, to match the project's name (HomelabAPI). The GitHub
