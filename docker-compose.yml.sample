@@ -1,7 +1,7 @@
 services:
 
   homelabapi:
-    image: gregdotca/homelab-api:latest
+    image: gregdotca/homelabapi:latest
     container_name: homelabapi
     environment:
       - TZ=America/Vancouver

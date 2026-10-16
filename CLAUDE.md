@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-HomelabAPI is a self-hosted FastAPI notification hub. Homelab services (Monit, Sonarr, Home Assistant, Tailscale, and so on) POST to it, and it fans each notification out to whichever outputs are configured (Telegram, Pushover, Discord, Matrix, email, and so on). Published as the `gregdotca/homelab-api` Docker image (until v0.10.1 it was `homelabapi/homelabapi`), from <https://github.com/gregdotca/homelab-api>; project site is <https://homelabapi.org>.
+HomelabAPI is a self-hosted FastAPI notification hub. Homelab services (Monit, Sonarr, Home Assistant, Tailscale, and so on) POST to it, and it fans each notification out to whichever outputs are configured (Telegram, Pushover, Discord, Matrix, email, and so on). Published as the `gregdotca/homelabapi` Docker image (it was `homelabapi/homelabapi` until v0.10.1 and `gregdotca/homelab-api` for v0.11.0), from <https://github.com/gregdotca/homelabapi>; project site is <https://homelabapi.org>.
 
 ## Running
 
@@ -42,5 +42,5 @@ Auth is a plain string compare against `app_api_key`. A bad key returns HTTP 401
 
 ## Releases
 
-- Version lives in `api_version` in `app/main.py`; bump it and add an entry to `CHANGELOG` (plain text, no `.md`, newest first, `vX.Y.Z      YYYY-MM-DD` headings). Since v0.8.0, the version bump and the CHANGELOG entry go in the same commit as the change they release (releases before that used separate commits). Tag the release commit `vX.Y.Z`.
+- Version lives in `api_version` in `app/main.py`; bump it and add an entry to `CHANGELOG` (plain text, no `.md`, newest first, `vX.Y.Z      YYYY-MM-DD` headings). Since v0.8.0, the version bump and the CHANGELOG entry go in the same commit as the change they release (releases before that used separate commits). Tag the release commit `vX.Y.Z`, and give every tag a GitHub Release titled `vX.Y.Z` whose notes are that version's CHANGELOG bullets.
 - `ACR.md` rates the project `B1b` (AI Share 1–25%, Oversight Reviewed). If the AI share of the code or the oversight level changes, update the rating, the `updated` date, and the README badge together.

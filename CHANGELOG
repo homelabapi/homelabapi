@@ -1,5 +1,20 @@
 HomelabAPI CHANGELOG
 ====================
+v0.11.1     2026-10-15
+- Renamed the GitHub repository and Docker image from homelab-api to
+  homelabapi, to match the project's name (HomelabAPI). The GitHub
+  repository is now https://github.com/gregdotca/homelabapi (the
+  gregdotca/homelab-api and homelabapi/homelabapi URLs redirect
+  there), and the Docker image is now gregdotca/homelabapi. The
+  gregdotca/homelab-api image gets no further updates, so change
+  "image:" in your docker-compose.yml to gregdotca/homelabapi:latest
+  to keep getting new releases
+- Updated the image in docker-compose.yml.sample, the GitHub links in
+  CONTRIBUTING.md, the screenshot link in README.md, and the
+  repository and image names in CLAUDE.md
+- Noted in CLAUDE.md that every release tag gets a GitHub Release with
+  that version's CHANGELOG notes
+
 v0.11.0     2026-10-15
 - Moved the project to a new home. The GitHub repository is now
   https://github.com/gregdotca/homelab-api (the old
