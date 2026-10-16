@@ -1,11 +1,9 @@
 services:
 
   homelabapi:
-    image: homelabapi/homelabapi:latest
+    image: gregdotca/homelab-api:latest
     container_name: homelabapi
     environment:
-      - PUID=1001
-      - PGID=1001
       - TZ=America/Vancouver
     ports:
       - "8090:80"

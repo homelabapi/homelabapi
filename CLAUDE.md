@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-HomelabAPI is a self-hosted FastAPI notification hub. Homelab services (Monit, Sonarr, Home Assistant, Tailscale, and so on) POST to it, and it fans each notification out to whichever outputs are configured (Telegram, Pushover, Discord, Matrix, email, and so on). Published as the `homelabapi/homelabapi` Docker image; project site is <https://homelabapi.org>.
+HomelabAPI is a self-hosted FastAPI notification hub. Homelab services (Monit, Sonarr, Home Assistant, Tailscale, and so on) POST to it, and it fans each notification out to whichever outputs are configured (Telegram, Pushover, Discord, Matrix, email, and so on). Published as the `gregdotca/homelab-api` Docker image (until v0.10.1 it was `homelabapi/homelabapi`), from <https://github.com/gregdotca/homelab-api>; project site is <https://homelabapi.org>.
 
 ## Running
 

@@ -20,7 +20,7 @@ Due to the nature of HomelabAPI, a fully functional demo is a bit tricky, howeve
 
 <https://demo.homelabapi.org>
 
-[![HomelabAPI](https://raw.githubusercontent.com/homelabapi/homelabapi/main/screenshot.png)](https://raw.githubusercontent.com/homelabapi/homelabapi/main/screenshot.png)
+[![HomelabAPI](https://raw.githubusercontent.com/gregdotca/homelab-api/main/screenshot.png)](https://raw.githubusercontent.com/gregdotca/homelab-api/main/screenshot.png)
 
 Supported Inputs
 ----------------

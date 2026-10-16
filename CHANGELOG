@@ -1,5 +1,19 @@
 HomelabAPI CHANGELOG
 ====================
+v0.11.0     2026-10-15
+- Moved the project to a new home. The GitHub repository is now
+  https://github.com/gregdotca/homelab-api (the old
+  homelabapi/homelabapi URLs redirect there), and the Docker image is
+  now gregdotca/homelab-api on Docker Hub. The homelabapi/homelabapi
+  image gets no further updates, so change "image:" in your
+  docker-compose.yml to gregdotca/homelab-api:latest to keep getting
+  new releases
+- Updated the image in docker-compose.yml.sample, the GitHub links in
+  CONTRIBUTING.md, the screenshot link in README.md, and the
+  repository and image names in CLAUDE.md
+- Removed PUID and PGID from docker-compose.yml.sample. The image never
+  used them (it doesn't switch users), so setting them did nothing
+
 v0.10.1     2026-10-15
 - Fixed requests whose JSON body has no Content-Type header, such as
   Healthchecks webhooks, being rejected with a 422 since v0.10.0.
